@@ -23,29 +23,29 @@ class BurgerBuilder extends Component {
     purchasing: false,
     loading: false,
   };
-  
+
   componentDidMount() {
     axios
-    .get(
-      "https://my-burger-builder-app-c9eaa-default-rtdb.firebaseio.com/ingredients.json"
+      .get(
+        "https://my-burger-builder-app-c9eaa-default-rtdb.firebaseio.com/ingredients.json"
       )
       .then((response) => {
         this.setState({ ingredients: response.data });
       });
-      this.setInitialPrice();
-    }
-    
-    updatePurchaseState(ingredients) {
-      const sum = Object.keys(ingredients)
+    this.setInitialPrice();
+  }
+
+  updatePurchaseState(ingredients) {
+    const sum = Object.keys(ingredients)
       .map((key) => {
         return ingredients[key];
       })
       .reduce((sum, el) => {
         return sum + el;
       }, 0);
-      this.setState({
-        purchasable: sum > 0,
-      });
+    this.setState({
+      purchasable: sum > 0,
+    });
   }
 
   setInitialPrice() {
@@ -59,7 +59,6 @@ class BurgerBuilder extends Component {
     });
     this.updatePurchaseState(ingredients);
   }
-
 
   addIngredientHandler = (type) => {
     const oldCount = this.state.ingredients[type];
@@ -105,29 +104,44 @@ class BurgerBuilder extends Component {
   };
 
   purchaseContinuelHandler = () => {
-    this.setState({ loading: true });
-    const order = {
-      ingredients: this.state.ingredients,
-      price: this.state.totalPrice.toFixed(2),
-      customer: {
-        name: "Max",
-        address: {
-          street: "Test street 1",
-          zipCode: "1234",
-          country: "France",
-        },
-        email: "test@test.com",
-      },
-      deliveryMethod: "fastest",
-    };
-    axios
-      .post("/orders.json", order)
-      .then((response) => {
-        this.setState({ loading: false, purchasing: false });
-      })
-      .catch((error) => {
-        this.setState({ loading: false, purchasing: false });
-      });
+    // this.setState({ loading: true });
+    // const order = {
+    //   ingredients: this.state.ingredients,
+    //   price: this.state.totalPrice.toFixed(2),
+    //   customer: {
+    //     name: "Bilel",
+    //     address: {
+    //       street: "Test street 1",
+    //       zipCode: "1234",
+    //       country: "France",
+    //     },
+    //     email: "test@test.com",
+    //   },
+    //   deliveryMethod: "fastest",
+    // };
+    // axios
+    //   .post("/orders.json", order)
+    //   .then((response) => {
+    //     this.setState({ loading: false, purchasing: false });
+    //   })
+    //   .catch((error) => {
+    //     this.setState({ loading: false, purchasing: false });
+    //   });
+
+    const queryParams = [];
+    for (let i in this.state.ingredients) {
+      queryParams.push(
+        encodeURIComponent(i) +
+          "=" +
+          encodeURIComponent(this.state.ingredients[i])
+      );
+    }
+    const queryString = queryParams.join("&");
+
+    this.props.history.push({
+      pathname: "/checkout",
+      search: "?" + queryString,
+    });
   };
 
   render() {
